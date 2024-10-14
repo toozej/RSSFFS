@@ -21,6 +21,9 @@ jobs:
         run: |
           pip install pre-commit
           make pre-commit
+      - name: Run tests
+        run: |
+          make test
 
   gitleaks:
     name: gitleaks
@@ -130,7 +133,7 @@ jobs:
           distribution: goreleaser
           version: latest
           args: release --clean
-          workdir: '/home/runner/work/golang-starter/golang-starter'
+          workdir: '/home/runner/work/RSSFFS/RSSFFS'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
@@ -150,13 +153,13 @@ jobs:
         uses: sigstore/cosign-installer@main # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
       - name: Get public cosign key
         run: |
-          curl --silent https://raw.githubusercontent.com/toozej/golang-starter/main/golang-starter.pub -O
+          curl --silent https://raw.githubusercontent.com/toozej/RSSFFS/main/RSSFFS.pub -O
       - name: Verify signatures of binaries
         run: |
-          FILE=./dist/golang-starter_${{ matrix.platform }}_${{ matrix.arch }}/golang-starter${{ matrix.extension }}
+          FILE=./dist/RSSFFS_${{ matrix.platform }}_${{ matrix.arch }}/RSSFFS${{ matrix.extension }}
           if test -f "${FILE}"; then
             echo "verifying binary: ${FILE}"
-            cosign verify --key golang-starter.pub --signature "${FILE}.sig" "${FILE}"
+            cosign verify --key RSSFFS.pub --signature "${FILE}.sig" "${FILE}"
           else
             echo "skipping verifying non-existant binary: ${FILE}"
           fi
@@ -175,13 +178,13 @@ jobs:
         uses: sigstore/cosign-installer@main # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
       - name: Get public cosign key
         run: |
-          curl --silent https://raw.githubusercontent.com/toozej/golang-starter/main/golang-starter.pub -O
+          curl --silent https://raw.githubusercontent.com/toozej/RSSFFS/main/RSSFFS.pub -O
       - name: Verify signatures of archives
         run: |
-          FILE=./dist/golang-starter_${{ matrix.platform }}_${{ matrix.arch }}.${{ matrix.extension }}
+          FILE=./dist/RSSFFS_${{ matrix.platform }}_${{ matrix.arch }}.${{ matrix.extension }}
           if test -f "${FILE}"; then
             echo "verifying archive: ${FILE}"
-            cosign verify --key golang-starter.pub --signature "${FILE}.sig" "${FILE}"
+            cosign verify --key RSSFFS.pub --signature "${FILE}.sig" "${FILE}"
           else
             echo "skipping verifying non-existant archive: ${FILE}"
           fi
@@ -194,7 +197,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
         with:
-          image-ref: 'ghcr.io/toozej/golang-starter:latest'
+          image-ref: 'ghcr.io/toozej/rssffs:latest'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -212,10 +215,10 @@ jobs:
     steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@main # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
-      - name: Get public cosign key for golang-starter project from GitHub
+      - name: Get public cosign key for RSSFFS project from GitHub
         run: |
-          curl --silent https://raw.githubusercontent.com/toozej/golang-starter/main/golang-starter.pub -O
+          curl --silent https://raw.githubusercontent.com/toozej/RSSFFS/main/RSSFFS.pub -O
       - name: Verify signatures of Docker images
         run: |
-          cosign verify --key golang-starter.pub \
-            ${{ matrix.registry }}toozej/golang-starter:${{ matrix.tag }}
+          cosign verify --key RSSFFS.pub \
+            ${{ matrix.registry }}toozej/rssffs:${{ matrix.tag }}

@@ -41,24 +41,22 @@ local-release-verify: local-release local-sign local-verify ## Release and verif
 pre-reqs: pre-commit-install ## Install pre-commit hooks and necessary binaries
 
 vet: ## Run `go vet` in Docker
-	docker build --target vet -f $(CURDIR)/Dockerfile -t toozej/golang-starter:latest . 
+	docker build --target vet -f $(CURDIR)/Dockerfile -t toozej/rssffs:latest . 
 
 test: ## Run `go test` in Docker
-	docker build --target test -f $(CURDIR)/Dockerfile -t toozej/golang-starter:latest . 
-	@echo -e "\nStatements missing coverage"
-	@grep -v -e " 1$$" c.out
+	docker build --progress=plain --target test -f $(CURDIR)/Dockerfile -t toozej/rssffs:latest . 
 
 build: ## Build Docker image, including running tests
-	docker build -f $(CURDIR)/Dockerfile -t toozej/golang-starter:latest .
+	docker build -f $(CURDIR)/Dockerfile -t toozej/rssffs:latest .
 
-get-cosign-pub-key: ## Get golang-starter Cosign public key from GitHub
-	test -f $(CURDIR)/golang-starter.pub || curl --silent https://raw.githubusercontent.com/toozej/golang-starter/main/golang-starter.pub -O
+get-cosign-pub-key: ## Get RSSFFS Cosign public key from GitHub
+	test -f $(CURDIR)/RSSFFS.pub || curl --silent https://raw.githubusercontent.com/toozej/RSSFFS/main/RSSFFS.pub -O
 
 verify: get-cosign-pub-key ## Verify Docker image with Cosign
-	cosign verify --key $(CURDIR)/golang-starter.pub toozej/golang-starter:latest
+	cosign verify --key $(CURDIR)/RSSFFS.pub toozej/rssffs:latest
 
 run: ## Run built Docker image
-	docker run --rm --name golang-starter -v $(CURDIR)/config:/config toozej/golang-starter:latest
+	docker run --rm --name RSSFFS --env-file $(CURDIR)/.env toozej/rssffs:latest
 
 up: test build ## Run Docker Compose project with build Docker image
 	docker compose -f docker-compose.yml down --remove-orphans
@@ -69,10 +67,10 @@ down: ## Stop running Docker Compose project
 	docker compose -f docker-compose.yml down --remove-orphans
 
 distroless-build: ## Build Docker image using distroless as final base
-	docker build -f $(CURDIR)/Dockerfile.distroless -t toozej/golang-starter:distroless . 
+	docker build -f $(CURDIR)/Dockerfile.distroless -t toozej/rssffs:distroless . 
 
 distroless-run: ## Run built Docker image using distroless as final base
-	docker run --rm --name golang-starter -v $(CURDIR)/config:/config toozej/golang-starter:distroless
+	docker run --rm --name RSSFFS --env-file $(CURDIR)/.env toozej/rssffs:distroless
 
 local-update-deps: ## Run `go get -t -u ./...` to update Go module dependencies
 	go get -t -u ./...
@@ -80,7 +78,8 @@ local-update-deps: ## Run `go get -t -u ./...` to update Go module dependencies
 local-vet: ## Run `go vet` using locally installed golang toolchain
 	go vet $(CURDIR)/...
 
-local-vendor: ## Run `go mod vendor` using locally installed golang toolchain
+local-vendor: ## Run `go mod tidy & vendor` using locally installed golang toolchain
+	go mod tidy
 	go mod vendor
 
 local-test: ## Run `go test` using locally installed golang toolchain
@@ -95,33 +94,37 @@ local-build: ## Run `go build` using locally installed golang toolchain
 	CGO_ENABLED=0 go build -o $(CURDIR)/out/ -ldflags="$(LDFLAGS)"
 
 local-run: ## Run locally built binary
-	$(CURDIR)/out/golang-starter
+	if test -e $(CURDIR)/.env; then \
+		export `cat $(CURDIR)/.env | xargs` && $(CURDIR)/out/RSSFFS --category photography https://blog.jimgrey.net/2024/08/13/film-photography-blogs-you-should-follow-5/; \
+	else \
+		echo "No environment variables found at $(CURDIR)/.env. Cannot run."; \
+	fi
 
 local-release-test: ## Build assets and test goreleaser config using locally installed golang toolchain and goreleaser
 	goreleaser check
 	goreleaser build --rm-dist --snapshot
 
 local-release: local-test docker-login ## Release assets using locally installed golang toolchain and goreleaser
-	if test -e $(CURDIR)/golang-starter.key && test -e $(CURDIR)/.env; then \
+	if test -e $(CURDIR)/RSSFFS.key && test -e $(CURDIR)/.env; then \
 		export `cat $(CURDIR)/.env | xargs` && goreleaser release --rm-dist; \
 	else \
-		echo "no cosign private key found at $(CURDIR)/golang-starter.key. Cannot release."; \
+		echo "no cosign private key found at $(CURDIR)/RSSFFS.key. Cannot release."; \
 	fi
 
 local-sign: local-test ## Sign locally installed golang toolchain and cosign
-	if test -e $(CURDIR)/golang-starter.key && test -e $(CURDIR)/.env; then \
-		export `cat $(CURDIR)/.env | xargs` && cosign sign-blob --key=$(CURDIR)/golang-starter.key --output-signature=$(CURDIR)/golang-starter.sig $(CURDIR)/out/golang-starter; \
+	if test -e $(CURDIR)/RSSFFS.key && test -e $(CURDIR)/.env; then \
+		export `cat $(CURDIR)/.env | xargs` && cosign sign-blob --key=$(CURDIR)/RSSFFS.key --output-signature=$(CURDIR)/RSSFFS.sig $(CURDIR)/out/RSSFFS; \
 	else \
-		echo "no cosign private key found at $(CURDIR)/golang-starter.key. Cannot release."; \
+		echo "no cosign private key found at $(CURDIR)/RSSFFS.key. Cannot release."; \
 	fi
 
 local-verify: get-cosign-pub-key ## Verify locally compiled binary
 	# cosign here assumes you're using Linux AMD64 binary
-	cosign verify-blob --key $(CURDIR)/golang-starter.pub --signature $(CURDIR)/golang-starter.sig $(CURDIR)/out/golang-starter
+	cosign verify-blob --key $(CURDIR)/RSSFFS.pub --signature $(CURDIR)/RSSFFS.sig $(CURDIR)/out/RSSFFS
 
 install: local-build local-verify ## Install compiled binary to local machine
-	sudo cp $(CURDIR)/out/golang-starter /usr/local/bin/golang-starter
-	sudo chmod 0755 /usr/local/bin/golang-starter
+	sudo cp $(CURDIR)/out/RSSFFS /usr/local/bin/RSSFFS
+	sudo chmod 0755 /usr/local/bin/RSSFFS
 
 docker-login: ## Login to Docker registries used to publish images to
 	if test -e $(CURDIR)/.env; then \
@@ -169,7 +172,7 @@ pre-commit-install: ## Install pre-commit hooks and necessary binaries
 pre-commit-run: ## Run pre-commit hooks against all files
 	pre-commit run --all-files
 	# manually run the following checks since their pre-commits aren't working or don't exist
-	go-licenses report github.com/toozej/golang-starter/cmd/golang-starter
+	go-licenses report github.com/toozej/RSSFFS/cmd/RSSFFS
 	govulncheck ./...
 
 update-golang-version: ## Update to latest Golang version across the repo
@@ -180,17 +183,17 @@ update-golang-version: ## Update to latest Golang version across the repo
 docs: docs-generate docs-serve ## Generate and serve documentation
 
 docs-generate:
-	docker build -f $(CURDIR)/Dockerfile.docs -t toozej/golang-starter:docs . 
-	docker run --rm --name golang-starter-docs -v $(CURDIR):/package -v $(CURDIR)/docs:/docs toozej/golang-starter:docs
+	docker build -f $(CURDIR)/Dockerfile.docs -t toozej/RSSFFS:docs . 
+	docker run --rm --name RSSFFS-docs -v $(CURDIR):/package -v $(CURDIR)/docs:/docs toozej/RSSFFS:docs
 
 docs-serve: ## Serve documentation on http://localhost:9000
-	docker run -d --rm --name golang-starter-docs-serve -p 9000:3080 -v $(CURDIR)/docs:/data thomsch98/markserv
+	docker run -d --rm --name RSSFFS-docs-serve -p 9000:3080 -v $(CURDIR)/docs:/data thomsch98/markserv
 	$(OPENER) http://localhost:9000/docs.md
 	@echo -e "to stop docs container, run:\n"
-	@echo "docker kill golang-starter-docs-serve"
+	@echo "docker kill RSSFFS-docs-serve"
 
 clean: ## Remove any locally compiled binaries
-	rm -f $(CURDIR)/out/golang-starter
+	rm -f $(CURDIR)/out/RSSFFS
 
 help: ## Display help text
 	@grep -E '^[a-zA-Z_-]+ ?:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

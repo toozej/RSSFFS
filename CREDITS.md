@@ -1,6 +1,6 @@
 # Credits and Acknowledgements
 
-Below is a list of various projects and code-snippets used in this golang-starter repo, or were otherwise instrumental in the building of this starter. Thanks to everyone involved in these projects!
+Below is a list of various projects and code-snippets used in this RSSFFS repo, or were otherwise instrumental in the building of this starter. Thanks to everyone involved in these projects!
 
 ## Overall
 - <https://github.com/MartinHeinz/go-project-blueprint>
