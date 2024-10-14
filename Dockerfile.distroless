@@ -1,22 +1,22 @@
 # setup project and deps
 FROM golang:1.23-bullseye AS init
 
-WORKDIR /go/golang-starter/
+WORKDIR /go/RSSFFS/
 
 COPY go.mod* go.sum* ./
 RUN go mod download
 
 COPY . ./
 
-FROM init as vet
+FROM init AS vet
 RUN go vet ./...
 
 # run tests
-FROM init as test
+FROM init AS test
 RUN go test -coverprofile c.out -v ./...
 
 # build binary
-FROM init as build
+FROM init AS build
 ARG LDFLAGS
 
 RUN CGO_ENABLED=0 go build -ldflags="${LDFLAGS}"
@@ -24,8 +24,8 @@ RUN CGO_ENABLED=0 go build -ldflags="${LDFLAGS}"
 # runtime image including CA certs and tzdata
 FROM gcr.io/distroless/static-debian12:latest
 # Copy our static executable.
-COPY --from=build /go/golang-starter/golang-starter /go/bin/golang-starter
+COPY --from=build /go/RSSFFS/RSSFFS /go/bin/RSSFFS
 # Expose port for publishing as web service
 # EXPOSE 8080
 # Run the binary.
-ENTRYPOINT ["/go/bin/golang-starter"]
+ENTRYPOINT ["/go/bin/RSSFFS"]

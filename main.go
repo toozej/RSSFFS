@@ -1,6 +1,6 @@
 package main
 
-import cmd "github.com/toozej/golang-starter/cmd/golang-starter"
+import cmd "github.com/toozej/RSSFFS/cmd/RSSFFS"
 
 func main() {
 	cmd.Execute()
