@@ -2,8 +2,6 @@ module github.com/toozej/RSSFFS
 
 go 1.24
 
-toolchain go1.24.1
-
 require github.com/spf13/viper v1.20.1
 
 require (
@@ -12,7 +10,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
 	go.uber.org/automaxprocs v1.6.0
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	golang.org/x/time v0.11.0
 )
 
