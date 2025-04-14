@@ -182,14 +182,14 @@ update-golang-version: ## Update to latest Golang version across the repo
 docs: docs-generate docs-serve ## Generate and serve documentation
 
 docs-generate:
-	docker build -f $(CURDIR)/Dockerfile.docs -t toozej/RSSFFS:docs . 
-	docker run --rm --name RSSFFS-docs -v $(CURDIR):/package -v $(CURDIR)/docs:/docs toozej/RSSFFS:docs
+	docker build -f $(CURDIR)/Dockerfile.docs -t toozej/rssffs:docs . 
+	docker run --rm --name rssffs-docs -v $(CURDIR):/package -v $(CURDIR)/docs:/docs toozej/rssffs:docs
 
 docs-serve: ## Serve documentation on http://localhost:9000
-	docker run -d --rm --name RSSFFS-docs-serve -p 9000:3080 -v $(CURDIR)/docs:/data thomsch98/markserv
+	docker run -d --rm --name rssffs-docs-serve -p 9000:3080 -v $(CURDIR)/docs:/data thomsch98/markserv
 	$(OPENER) http://localhost:9000/docs.md
 	@echo -e "to stop docs container, run:\n"
-	@echo "docker kill RSSFFS-docs-serve"
+	@echo "docker kill rssffs-docs-serve"
 
 clean: ## Remove any locally compiled binaries
 	rm -f $(CURDIR)/out/RSSFFS
