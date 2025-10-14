@@ -1,6 +1,7 @@
 # runtime image
 FROM scratch
 # Copy our static executable.
-COPY RSSFFS /go/bin/RSSFFS
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/RSSFFS /go/bin/RSSFFS
 # Run the binary.
 ENTRYPOINT ["/go/bin/RSSFFS"]

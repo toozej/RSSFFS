@@ -33,6 +33,9 @@ builds:
       - arm64
     goarm:
       - "7"
+    ignore:
+      - goos: windows
+        goarch: arm
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
@@ -76,142 +79,85 @@ changelog:
     - title: Other work
       order: 9999
 
-dockers:
-  - image_templates:
-      - 'toozej/rssffs:{{ .Tag }}-amd64'
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-amd64'
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-amd64'
+dockers_v2:
+  - id: rssffs
+    images:
+      - 'toozej/rssffs'
+      - 'ghcr.io/toozej/rssffs'
+      - 'quay.io/toozej/rssffs'
+    tags:
+      - "v{{ .Version }}"
+      - "{{ .Version }}"
+      - "latest"
     dockerfile: Dockerfile.goreleaser
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
-      - "--label=io.artifacthub.package.maintainers=[{\"name\":\"toozej\"}]"
-      - "--label=io.artifacthub.package.license=GPLv3"
-      - "--label=org.opencontainers.image.description=Golang starter template"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.name={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-      - "--platform=linux/amd64"
+    labels:
+      "io.artifacthub.package.readme-url": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
+      "io.artifacthub.package.maintainers": "[{\"name\":\"toozej\"}]"
+      "io.artifacthub.package.license": "GPLv3"
+      "org.opencontainers.image.description": "RSS Feed Finder [and] Subscriber"
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.name": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+      "org.opencontainers.image.source": "{{.GitURL}}"
+      "org.opencontainers.image.authors": "James Tooze https://github.com/toozej/"
+      "org.opencontainers.image.documentation": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
+      "org.opencontainers.image.licenses": "GPL-3.0-only"
+      "org.opencontainers.image.title": "{{.ProjectName}}"
+      "org.opencontainers.image.vendor": "James Tooze"
+    annotations:
+      "index,manifest:org.opencontainers.image.authors": "James Tooze https://github.com/toozej/"
+      "index,manifest:org.opencontainers.image.created": "{{.Date}}"
+      "index,manifest:org.opencontainers.image.description": "RSS Feed Finder [and] Subscriber"
+      "index,manifest:org.opencontainers.image.documentation": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
+      "index,manifest:org.opencontainers.image.licenses": "GPL-3.0-only"
+      "index,manifest:org.opencontainers.image.revision": "{{.FullCommit}}"
+      "index,manifest:org.opencontainers.image.source": "https://github.com/toozej/RSSFFS"
+      "index,manifest:org.opencontainers.image.title": "{{.ProjectName}}"
+      "index,manifest:org.opencontainers.image.vendor": "James Tooze"
+      "index,manifest:org.opencontainers.image.version": "{{.Version}}"
     extra_files:
       - scripts/goreleaser_entrypoint.sh
-  - image_templates:
-      - 'toozej/rssffs:{{ .Tag }}-arm64'
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-arm64'
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-arm64'
-    dockerfile: Dockerfile.goreleaser
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
-      - "--label=io.artifacthub.package.maintainers=[{\"name\":\"toozej\"}]"
-      - "--label=io.artifacthub.package.license=GPLv3"
-      - "--label=org.opencontainers.image.description=Golang starter template"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.name={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-      - "--platform=linux/arm64"
-    goarch: arm64
-    extra_files:
-      - scripts/goreleaser_entrypoint.sh
-  - image_templates:
-      - 'toozej/rssffs:{{ .Tag }}-distroless-amd64'
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-distroless-amd64'
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-distroless-amd64'
+  - id: rssffs-distroless
+    images:
+      - 'toozej/rssffs'
+      - 'ghcr.io/toozej/rssffs'
+      - 'quay.io/toozej/rssffs'
+    tags:
+      - "v{{ .Version }}-distroless"
+      - "{{ .Version }}-distroless"
+      - "distroless"
     dockerfile: Dockerfile.goreleaser.distroless
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
-      - "--label=io.artifacthub.package.maintainers=[{\"name\":\"toozej\"}]"
-      - "--label=io.artifacthub.package.license=GPLv3"
-      - "--label=org.opencontainers.image.description=Golang starter template"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.name={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-      - "--platform=linux/amd64"
-    extra_files:
-      - scripts/goreleaser_entrypoint.sh
-  - image_templates:
-      - 'toozej/rssffs:{{ .Tag }}-distroless-arm64'
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-distroless-arm64'
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-distroless-arm64'
-    dockerfile: Dockerfile.goreleaser.distroless
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
-      - "--label=io.artifacthub.package.maintainers=[{\"name\":\"toozej\"}]"
-      - "--label=io.artifacthub.package.license=GPLv3"
-      - "--label=org.opencontainers.image.description=Golang starter template"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.name={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-      - "--platform=linux/arm64"
-    goarch: arm64
+    labels:
+      "io.artifacthub.package.readme-url": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
+      "io.artifacthub.package.maintainers": "[{\"name\":\"toozej\"}]"
+      "io.artifacthub.package.license": "GPLv3"
+      "org.opencontainers.image.description": "RSS Feed Finder [and] Subscriber"
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.name": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+      "org.opencontainers.image.source": "{{.GitURL}}"
+      "org.opencontainers.image.authors": "James Tooze https://github.com/toozej/"
+      "org.opencontainers.image.documentation": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
+      "org.opencontainers.image.licenses": "GPL-3.0-only"
+      "org.opencontainers.image.title": "{{.ProjectName}}"
+      "org.opencontainers.image.vendor": "James Tooze"
+    annotations:
+      "index,manifest:org.opencontainers.image.authors": "James Tooze https://github.com/toozej/"
+      "index,manifest:org.opencontainers.image.created": "{{.Date}}"
+      "index,manifest:org.opencontainers.image.description": "RSS Feed Finder [and] Subscriber"
+      "index,manifest:org.opencontainers.image.documentation": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
+      "index,manifest:org.opencontainers.image.licenses": "GPL-3.0-only"
+      "index,manifest:org.opencontainers.image.revision": "{{.FullCommit}}"
+      "index,manifest:org.opencontainers.image.source": "https://github.com/toozej/RSSFFS"
+      "index,manifest:org.opencontainers.image.title": "{{.ProjectName}}"
+      "index,manifest:org.opencontainers.image.vendor": "James Tooze"
+      "index,manifest:org.opencontainers.image.version": "{{.Version}}"
     extra_files:
       - scripts/goreleaser_entrypoint.sh
 
-docker_manifests:
-  # tagged
-  - name_template: 'toozej/rssffs:{{ .Tag }}'
-    image_templates:
-      - 'toozej/rssffs:{{ .Tag }}-amd64'
-      - 'toozej/rssffs:{{ .Tag }}-arm64'
-  - name_template: 'ghcr.io/toozej/rssffs:{{ .Tag }}'
-    image_templates:
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-amd64'
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-arm64'
-  - name_template: 'quay.io/toozej/rssffs:{{ .Tag }}'
-    image_templates:
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-amd64'
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-arm64'
-  - name_template: 'toozej/rssffs:{{ .Tag }}-distroless'
-    image_templates:
-      - 'toozej/rssffs:{{ .Tag }}-distroless-amd64'
-      - 'toozej/rssffs:{{ .Tag }}-distroless-arm64'
-  - name_template: 'ghcr.io/toozej/rssffs:{{ .Tag }}-distroless'
-    image_templates:
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-distroless-amd64'
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-distroless-arm64'
-  - name_template: 'quay.io/toozej/rssffs:{{ .Tag }}-distroless'
-    image_templates:
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-distroless-amd64'
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-distroless-arm64'
-  # latest
-  - name_template: 'toozej/rssffs:latest'
-    image_templates:
-      - 'toozej/rssffs:{{ .Tag }}-amd64'
-      - 'toozej/rssffs:{{ .Tag }}-arm64'
-  - name_template: 'ghcr.io/toozej/rssffs:latest'
-    image_templates:
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-amd64'
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-arm64'
-  - name_template: 'quay.io/toozej/rssffs:latest'
-    image_templates:
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-amd64'
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-arm64'
-  # distroless
-  - name_template: 'toozej/rssffs:distroless'
-    image_templates:
-      - 'toozej/rssffs:{{ .Tag }}-distroless-amd64'
-      - 'toozej/rssffs:{{ .Tag }}-distroless-arm64'
-  - name_template: 'ghcr.io/toozej/rssffs:distroless'
-    image_templates:
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-distroless-amd64'
-      - 'ghcr.io/toozej/rssffs:{{ .Tag }}-distroless-arm64'
-  - name_template: 'quay.io/toozej/rssffs:distroless'
-    image_templates:
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-distroless-amd64'
-      - 'quay.io/toozej/rssffs:{{ .Tag }}-distroless-arm64'
+
 
 archives:
   - name_template: >-
@@ -273,6 +219,30 @@ nfpms:
       lintian_overrides:
         - statically-linked-binary
         - changelog-file-missing-in-native-package
+
+homebrew_casks:
+  - name: rssffs
+    homepage: https://github.com/toozej/RSSFFS
+    description: "RSS Feed Finder [and] Subscriber"
+    license: GPLv3
+    repository:
+      owner: toozej
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    manpages:
+      - "man/RSSFFS.1.gz"
+    completions:
+      bash: "completions/RSSFFS.bash"
+      zsh: "completions/RSSFFS.zsh"
+      fish: "completions/RSSFFS.fish"
+    url:
+      verified: "github.com/toozej/RSSFFS/releases/download"
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/RSSFFS"]
+          end
 
 sboms:
   - artifacts: archive

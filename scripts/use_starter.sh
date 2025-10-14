@@ -13,7 +13,8 @@ function handle_error {
 fetch_credentials() {
     echo "Fetching credentials from 1Password..."
 
-    GH_GHCR_TOKEN=$(op item get "github.com" --field ghcr_token --reveal) || handle_error "Failed to fetch GitHub GHCR token."
+    GH_GHCR_TOKEN=$(op item get "github.com" --field ghcr_token --reveal) || handle_error "Failed to fetch GHCR GitHub token."
+    TAP_GITHUB_TOKEN=$(op item get "github.com" --field tap_token --reveal) || handle_error "Failed to fetch Homebrew Tap GitHub token."
     DOCKERHUB_USERNAME=$(op item get "docker.com" --field username) || handle_error "Failed to fetch DockerHub username."
     DOCKERHUB_TOKEN=$(op item get "docker.com" --field token --reveal) || handle_error "Failed to fetch DockerHub token."
     QUAY_USERNAME=$(op item get "Quay.io" --field username) || handle_error "Failed to fetch Quay username."
@@ -24,6 +25,7 @@ fetch_credentials() {
     cat <<EOF >> .env
 GITHUB_USERNAME=${GITHUB_USERNAME}
 GH_GHCR_TOKEN=${GH_GHCR_TOKEN}
+TAP_GITHUB_TOKEN=${TAP_GITHUB_TOKEN}
 DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}
 DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}
 QUAY_USERNAME=${QUAY_USERNAME}
@@ -91,6 +93,7 @@ generate_cosign_keys() {
 
     # Export passphrase for cosign to use
     export COSIGN_PASSWORD=${COSIGN_PASSPHRASE}
+    export COSIGN_PASSPHRASE=${COSIGN_PASSPHRASE}
 
     # Generate key-pair
     cosign generate-key-pair || handle_error "Cosign key generation failed."
@@ -103,28 +106,7 @@ generate_cosign_keys() {
     echo "COSIGN_PASSWORD=${COSIGN_PASSPHRASE}" >> .env || handle_error "Failed to write cosign passphrase to .env."
 }
 
-# Helper function to store secrets in 1Password
-store_in_1password() {
-    echo "Storing secrets in 1Password..."
 
-    # Check if the item exists; if not, create it
-    if ! op item get "${NEW_PROJECT_NAME}" &>/dev/null; then
-        # Create the 1Password item with the project name
-        op item create --category login --title "${NEW_PROJECT_NAME}" \
-            --url "https://github.com/${GITHUB_USERNAME}/${NEW_PROJECT_NAME}" \
-            --tags "Projects/${NEW_PROJECT_NAME}" || handle_error "Failed to create 1Password item."
-    fi
-
-    # Update the 1Password item with generated secrets
-    op item edit "${NEW_PROJECT_NAME}" \
-        "Cosign.Passphrase[password]=${COSIGN_PASSPHRASE}" \
-        "Cosign.Private Key[file]=${NEW_PROJECT_NAME}.key" \
-        "Cosign.Public Key[file]=${NEW_PROJECT_NAME}.pub" \
-        "GH PAT[password]=${GITHUB_TOKEN}" \
-        || handle_error "Failed to update 1Password item with secrets."
-
-    echo "Secrets successfully stored in 1Password."
-}
 
 # --- Main Script ---
 
@@ -183,7 +165,10 @@ fetch_credentials
 generate_cosign_keys
 
 # Store generated secrets in 1Password
-store_in_1password
+./scripts/upload_secrets_to_1password.sh secrets "${NEW_PROJECT_NAME}"
+
+# Store EnvFile in 1Password
+./scripts/upload_secrets_to_1password.sh envfile "${NEW_PROJECT_NAME}"
 
 # Call the external secrets upload script
 ./scripts/upload_secrets_to_github.sh "${NEW_PROJECT_NAME}"

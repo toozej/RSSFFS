@@ -9,6 +9,7 @@ import (
 	"net/url"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/toozej/RSSFFS/pkg/config"
 	"golang.org/x/net/html"
 )
 
@@ -138,12 +139,9 @@ func checkRSSFeed(client *http.Client, feedURL string) bool {
 	return strings.Contains(contentType, "xml") || strings.Contains(contentType, "rss")
 }
 
-func Run(pageURL string, category string, debug bool, clearCategoryFeeds bool) {
-	// Get configuration from environment variables
-	err := getEnvVars()
-	if err != nil {
-		log.Fatal("Error gathering required environment variables: ", err)
-	}
+func Run(pageURL string, category string, debug bool, clearCategoryFeeds bool, conf config.Config) {
+	// Use configuration passed from caller
+	apiEndpoint, apiKey = conf.RSSReaderEndpoint, conf.RSSReaderAPIKey
 
 	// Get categoryId of user-input category if it exists
 	categoryId, err := getCategoryId(apiEndpoint, apiKey, category)
