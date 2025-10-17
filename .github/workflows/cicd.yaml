@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
         with:
-          go-version: '^1.25'
+          go-version: "^1.25"
           check-latest: true
       - name: Run pre-commit
         run: |
@@ -56,7 +56,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
         with:
-          go-version: '^1.25'
+          go-version: "^1.25"
           check-latest: true
       - uses: github/codeql-action/init@v4 # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
         with:
@@ -72,13 +72,13 @@ jobs:
       - name: Run Trivy vulnerability scanner in fs mode
         uses: aquasecurity/trivy-action@master # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          exit-code: '1'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          exit-code: "1"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
 
   snyk:
     name: snyk
@@ -88,7 +88,7 @@ jobs:
       - uses: snyk/actions/setup@master # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
       - uses: actions/setup-go@v6
         with:
-          go-version: '^1.25'
+          go-version: "^1.25"
           check-latest: true
       - name: Snyk monitor
         run: snyk test
@@ -114,7 +114,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '^1.25'
+          go-version: "^1.25"
           check-latest: true
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3 # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
@@ -146,7 +146,7 @@ jobs:
           distribution: goreleaser
           version: latest
           args: release --clean
-          workdir: '/home/runner/work/RSSFFS/RSSFFS'
+          workdir: "/home/runner/work/RSSFFS/RSSFFS"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
@@ -167,9 +167,9 @@ jobs:
     permissions: {}
     strategy:
       matrix:
-        platform: ['darwin', 'linux', 'windows']
-        arch: ['all', 'amd64_v1', 'arm64', 'arm_7', '386']
-        extension: ['', '.exe']
+        platform: ["darwin", "linux", "windows"]
+        arch: ["all", "amd64_v1", "arm64", "arm_7", "386"]
+        extension: ["", ".exe"]
     steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@main # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
@@ -192,9 +192,9 @@ jobs:
     permissions: {}
     strategy:
       matrix:
-        platform: ['Darwin', 'Linux', 'Windows']
-        arch: ['all', 'arm64', 'armv7', 'i386', 'x86_64']
-        extension: ['tar.gz', 'zip']
+        platform: ["Darwin", "Linux", "Windows"]
+        arch: ["all", "arm64", "armv7", "i386", "x86_64"]
+        extension: ["tar.gz", "zip"]
     steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@main # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
@@ -219,12 +219,12 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
         with:
-          image-ref: 'ghcr.io/toozej/rssffs:latest'
-          format: 'table'
-          exit-code: '1'
+          image-ref: "ghcr.io/toozej/rssffs:latest"
+          format: "table"
+          exit-code: "1"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
 
   verify_signed_docker_images:
     runs-on: ubuntu-latest
@@ -232,8 +232,8 @@ jobs:
     permissions: {}
     strategy:
       matrix:
-        registry: ['', 'ghcr.io/', 'quay.io/']
-        tag: ['latest', 'distroless']
+        registry: ["", "ghcr.io/", "quay.io/"]
+        tag: ["latest", "distroless"]
     steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@main # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha

@@ -40,7 +40,7 @@ else
 	OPENER=open
 endif
 
-.PHONY: all vet test build verify run up down distroless-build distroless-run install local local-vet local-test local-cover local-run local-kill local-iterate local-release-test local-release local-sign local-verify local-release-verify local-install get-cosign-pub-key docker-login pre-commit-install pre-commit-run pre-commit pre-reqs update-golang-version upload-secrets-to-gh upload-secrets-envfile-to-1pass docs diagrams mutation-test test-changed watch-test profile-cpu profile-mem profile-all benchmark clean help
+.PHONY: all vet test build verify run up down up-prod down-prod install local local-vet local-test local-cover local-run local-kill local-iterate local-release-test local-release local-sign local-verify local-release-verify local-install get-cosign-pub-key docker-login pre-commit-install pre-commit-run pre-commit pre-reqs update-golang-version upload-secrets-to-gh upload-secrets-envfile-to-1pass docs diagrams mutation-test test-changed watch-test profile-cpu profile-mem profile-all benchmark clean help
 
 all: vet pre-commit clean test build verify run ## Run default workflow via Docker
 local: local-update-deps local-vendor local-vet pre-commit clean local-test local-cover local-build local-sign local-verify local-kill local-run ## Run default workflow using locally installed Golang toolchain
@@ -65,19 +65,23 @@ verify: get-cosign-pub-key ## Verify Docker image with Cosign
 run: ## Run built Docker image
 	docker run --rm --name RSSFFS --env-file $(CURDIR)/.env toozej/rssffs:latest
 
-up: test build ## Run Docker Compose project with build Docker image
+up: ## Run Docker Compose project with locally built Docker image
+	docker compose -f docker-compose.dev.yml down --remove-orphans
+	docker compose -f docker-compose.dev.yml build
+	docker compose -f docker-compose.dev.yml up -d
+
+down: ## Stop running Docker Compose project
+	docker compose -f docker-compose.dev.yml down --remove-orphans
+
+up-prod: ## Run Docker Compose project with registry Docker image
 	docker compose -f docker-compose.yml down --remove-orphans
 	docker compose -f docker-compose.yml pull
 	docker compose -f docker-compose.yml up -d
 
-down: ## Stop running Docker Compose project
+down-prod: ## Stop running production Docker Compose project
 	docker compose -f docker-compose.yml down --remove-orphans
 
-distroless-build: ## Build Docker image using distroless as final base
-	docker build -f $(CURDIR)/Dockerfile.distroless -t toozej/rssffs:distroless . 
 
-distroless-run: ## Run built Docker image using distroless as final base
-	docker run --rm --name RSSFFS --env-file $(CURDIR)/.env toozej/rssffs:distroless
 
 install: ## Install RSSFFS from latest GitHub release
 	if command -v go; then \
