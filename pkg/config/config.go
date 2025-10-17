@@ -44,6 +44,9 @@ import (
 // Currently supported configuration:
 //   - RSSReaderEndpoint: The RSS reader API endpoint URL
 //   - RSSReaderAPIKey: The API key for RSS reader authentication
+//   - WebHost: The host address for the web server (default: 127.0.0.1)
+//   - WebPort: The port number for the web server (default: 8080)
+//   - SingleURLMode: Enable single URL mode for RSS discovery (default: false)
 //
 // Example:
 //
@@ -61,6 +64,23 @@ type Config struct {
 	// It is loaded from the RSS_READER_API_KEY environment variable.
 	// This field is required for the application to function.
 	RSSReaderAPIKey string `env:"RSS_READER_API_KEY"`
+
+	// WebHost specifies the host address to bind the web server to.
+	// It is loaded from the WEB_HOST environment variable.
+	// If not specified, defaults to "127.0.0.1".
+	WebHost string `env:"WEB_HOST" envDefault:"127.0.0.1"`
+
+	// WebPort specifies the port number for the web server to listen on.
+	// It is loaded from the WEB_PORT environment variable.
+	// If not specified, defaults to 8080.
+	WebPort int `env:"WEB_PORT" envDefault:"8080"`
+
+	// SingleURLMode specifies whether to use single URL mode for RSS feed discovery.
+	// When enabled, only checks for RSS feeds on the provided URL's domain
+	// without traversing to other domains found on the webpage.
+	// It is loaded from the RSSFFS_SINGLE_URL_MODE environment variable.
+	// If not specified, defaults to false (traversal mode).
+	SingleURLMode bool `env:"RSSFFS_SINGLE_URL_MODE" envDefault:"false"`
 }
 
 // GetEnvVars loads and returns the application configuration from environment

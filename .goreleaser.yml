@@ -89,45 +89,10 @@ dockers_v2:
       - "v{{ .Version }}"
       - "{{ .Version }}"
       - "latest"
-    dockerfile: Dockerfile.goreleaser
-    labels:
-      "io.artifacthub.package.readme-url": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
-      "io.artifacthub.package.maintainers": "[{\"name\":\"toozej\"}]"
-      "io.artifacthub.package.license": "GPLv3"
-      "org.opencontainers.image.description": "RSS Feed Finder [and] Subscriber"
-      "org.opencontainers.image.created": "{{.Date}}"
-      "org.opencontainers.image.name": "{{.ProjectName}}"
-      "org.opencontainers.image.revision": "{{.FullCommit}}"
-      "org.opencontainers.image.version": "{{.Version}}"
-      "org.opencontainers.image.source": "{{.GitURL}}"
-      "org.opencontainers.image.authors": "James Tooze https://github.com/toozej/"
-      "org.opencontainers.image.documentation": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
-      "org.opencontainers.image.licenses": "GPL-3.0-only"
-      "org.opencontainers.image.title": "{{.ProjectName}}"
-      "org.opencontainers.image.vendor": "James Tooze"
-    annotations:
-      "index,manifest:org.opencontainers.image.authors": "James Tooze https://github.com/toozej/"
-      "index,manifest:org.opencontainers.image.created": "{{.Date}}"
-      "index,manifest:org.opencontainers.image.description": "RSS Feed Finder [and] Subscriber"
-      "index,manifest:org.opencontainers.image.documentation": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
-      "index,manifest:org.opencontainers.image.licenses": "GPL-3.0-only"
-      "index,manifest:org.opencontainers.image.revision": "{{.FullCommit}}"
-      "index,manifest:org.opencontainers.image.source": "https://github.com/toozej/RSSFFS"
-      "index,manifest:org.opencontainers.image.title": "{{.ProjectName}}"
-      "index,manifest:org.opencontainers.image.vendor": "James Tooze"
-      "index,manifest:org.opencontainers.image.version": "{{.Version}}"
-    extra_files:
-      - scripts/goreleaser_entrypoint.sh
-  - id: rssffs-distroless
-    images:
-      - 'toozej/rssffs'
-      - 'ghcr.io/toozej/rssffs'
-      - 'quay.io/toozej/rssffs'
-    tags:
       - "v{{ .Version }}-distroless"
       - "{{ .Version }}-distroless"
       - "distroless"
-    dockerfile: Dockerfile.goreleaser.distroless
+    dockerfile: Dockerfile.goreleaser
     labels:
       "io.artifacthub.package.readme-url": "https://raw.githubusercontent.com/toozej/RSSFFS/main/README.md"
       "io.artifacthub.package.maintainers": "[{\"name\":\"toozej\"}]"

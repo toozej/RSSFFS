@@ -13,22 +13,19 @@ RUN go vet ./...
 
 # run tests
 FROM init AS test
-RUN go test -coverprofile c.out -v ./... && \
-	echo "Statements missing coverage" && \
-	grep -v -e " 1$" c.out
+RUN go test -coverprofile c.out -v ./...
 
 # build binary
 FROM init AS build
 ARG LDFLAGS
 
-# Install coreutils for sleep and other utilities utilized in devcontainer
-RUN apt-get update && apt-get install --no-install-recommends -y coreutils
-
 RUN CGO_ENABLED=0 go build -ldflags="${LDFLAGS}"
 
-# runtime image
-FROM scratch
+# runtime image including CA certs and tzdata
+FROM gcr.io/distroless/static-debian12:latest
 # Copy our static executable.
 COPY --from=build /go/RSSFFS/RSSFFS /go/bin/RSSFFS
+# Expose port for publishing as web service
+EXPOSE 8080
 # Run the binary.
 ENTRYPOINT ["/go/bin/RSSFFS"]

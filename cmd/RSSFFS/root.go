@@ -51,6 +51,12 @@ var (
 	// within the specified category before subscribing to new feeds.
 	// Set via the --clearCategoryFeeds/-r flag.
 	clearCategoryFeeds bool
+
+	// singleURLMode enables single URL mode when set to true.
+	// When enabled, only checks for RSS feeds on the provided URL's domain
+	// instead of traversing all domains found on the page.
+	// Set via the --single-url/-s flag.
+	singleURLMode bool
 )
 
 // rootCmd defines the base command for the RSSFFS CLI application.
@@ -65,9 +71,28 @@ var (
 //   - Validates URL format before processing
 //   - Integrates with RSS reader API for feed subscription
 var rootCmd = &cobra.Command{
-	Use:              "RSSFFS [pageURL]",
-	Short:            "RSS Feed Finder [and] Subscriber",
-	Long:             `Automatically find and subscribe to RSS feeds found on inputted URL, and on URLs mentioned on the inputted URL.`,
+	Use:   "RSSFFS [pageURL]",
+	Short: "RSS Feed Finder [and] Subscriber",
+	Long: `Automatically find and subscribe to RSS feeds found on inputted URL, and on URLs mentioned on the inputted URL.
+
+RSSFFS operates in two modes:
+
+1. Traversal Mode (default): Discovers RSS feeds on the provided URL and follows links to find feeds on other domains mentioned on the page.
+
+2. Single URL Mode: Only searches for RSS feeds on the specific domain of the provided URL, without following links to other domains.
+
+Examples:
+  # Basic usage (traversal mode)
+  RSSFFS https://example.com
+
+  # Single URL mode - only check example.com domain
+  RSSFFS --single-url https://example.com/blog/post
+
+  # Single URL mode with category
+  RSSFFS -s -c "Tech Blogs" https://blog.example.com
+
+  # Clear existing feeds and use single URL mode
+  RSSFFS -r -s -c "News" https://news.example.com`,
 	Args:             cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	PersistentPreRun: rootCmdPreRun,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -80,7 +105,19 @@ var rootCmd = &cobra.Command{
 			fmt.Println("Invalid URL input:", err)
 			os.Exit(1)
 		}
-		RSSFFS.Run(pageURL.String(), category, debug, clearCategoryFeeds, conf)
+
+		// Determine single URL mode with CLI flag precedence over environment variable
+		effectiveSingleURLMode := singleURLMode || conf.SingleURLMode
+		// If CLI flag was explicitly set, it takes precedence
+		if cmd.Flags().Changed("single-url") {
+			effectiveSingleURLMode = singleURLMode
+		}
+
+		count, err := RSSFFS.Run(pageURL.String(), category, debug, clearCategoryFeeds, effectiveSingleURLMode, conf)
+		if err != nil {
+			log.Fatalf("An error occurred during execution: %v", err)
+		}
+		log.Infof("Successfully subscribed to %d new RSS feed(s).", count)
 	},
 }
 
@@ -134,6 +171,7 @@ func Execute() {
 //   - debug (-d, --debug): Enables debug-level logging
 //   - clearCategoryFeeds (-r, --clearCategoryFeeds): Clears existing feeds before adding new ones
 //   - category (-c, --category): Specifies RSS reader category for new feeds
+//   - singleURLMode (-s, --single-url): Only check the provided URL for RSS feeds
 //
 // The flags are persistent, meaning they're inherited by all subcommands.
 func init() {
@@ -141,10 +179,12 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Enable debug-level logging")
 	rootCmd.PersistentFlags().BoolVarP(&clearCategoryFeeds, "clearCategoryFeeds", "r", false, "Delete all feeds within category before subscribing to new feeds")
 	rootCmd.PersistentFlags().StringVarP(&category, "category", "c", "", "RSS reader category name to assign new feeds to")
+	rootCmd.PersistentFlags().BoolVarP(&singleURLMode, "single-url", "s", false, "Enable single URL mode: only check the provided URL's domain for RSS feeds, without traversing to other domains found on the page")
 
 	// add sub-commands
 	rootCmd.AddCommand(
 		man.NewManCmd(),
 		version.Command(),
+		NewServeCommand(),
 	)
 }
