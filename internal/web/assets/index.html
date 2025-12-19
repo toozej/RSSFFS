@@ -67,6 +67,20 @@
             </form>
         </main>
 
+        <!-- Logs Panel -->
+        <div id="logs-panel" class="logs-panel">
+            <div class="logs-header">
+                <h3>Request Logs</h3>
+                <div class="logs-controls">
+                    <button id="toggle-logs" class="logs-toggle-btn">Show Logs</button>
+                    <button id="clear-logs" class="logs-clear-btn" style="display: none;">Clear</button>
+                </div>
+            </div>
+            <div id="logs-content" class="logs-content" style="display: none;">
+                <div id="logs-list" class="logs-list"></div>
+            </div>
+        </div>
+
         <footer>
             <p>RSSFFS v{{.Version}} {{if .Debug}}(Debug Mode){{end}}</p>
         </footer>

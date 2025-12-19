@@ -54,7 +54,7 @@ repos:
 
   # Golang formatting, linting, security and static analysis
   - repo: https://github.com/tekwizely/pre-commit-golang
-    rev: v1.0.0-rc.2
+    rev: v1.0.0-rc.4
     hooks:
       - id: go-sec-mod
       - id: go-staticcheck-mod
@@ -99,6 +99,7 @@ repos:
     rev: 'v1.89.0'
     hooks:
       - id: semgrep
+        language_version: python3.12
         # See https://semgrep.dev/explore to select a ruleset and copy its URL
         args: ['--config', 'auto', '--error', '--skip-unknown-extensions', '--quiet']
 

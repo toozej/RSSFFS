@@ -382,3 +382,221 @@ handleSubmissionResponse = function(response) {
         clearSavedFormData();
     }
 };
+
+// Logs functionality
+let logsVisible = false;
+let logsPollingInterval = null;
+
+// Initialize logs functionality
+document.addEventListener('DOMContentLoaded', function() {
+    setupLogsPanel();
+});
+
+// Setup logs panel functionality
+function setupLogsPanel() {
+    const toggleBtn = document.getElementById('toggle-logs');
+    const clearBtn = document.getElementById('clear-logs');
+    const logsContent = document.getElementById('logs-content');
+    
+    if (!toggleBtn || !clearBtn || !logsContent) {
+        console.warn('Logs panel elements not found');
+        return;
+    }
+    
+    // Toggle logs visibility
+    toggleBtn.addEventListener('click', function() {
+        logsVisible = !logsVisible;
+        
+        if (logsVisible) {
+            showLogsPanel();
+        } else {
+            hideLogsPanel();
+        }
+    });
+    
+    // Clear logs
+    clearBtn.addEventListener('click', function() {
+        clearLogsDisplay();
+    });
+}
+
+// Show logs panel
+function showLogsPanel() {
+    const toggleBtn = document.getElementById('toggle-logs');
+    const clearBtn = document.getElementById('clear-logs');
+    const logsContent = document.getElementById('logs-content');
+    
+    logsContent.style.display = 'block';
+    clearBtn.style.display = 'inline-block';
+    toggleBtn.textContent = 'Hide Logs';
+    toggleBtn.classList.add('active');
+    
+    // Start polling for logs
+    loadLogs();
+    startLogsPolling();
+}
+
+// Hide logs panel
+function hideLogsPanel() {
+    const toggleBtn = document.getElementById('toggle-logs');
+    const clearBtn = document.getElementById('clear-logs');
+    const logsContent = document.getElementById('logs-content');
+    
+    logsContent.style.display = 'none';
+    clearBtn.style.display = 'none';
+    toggleBtn.textContent = 'Show Logs';
+    toggleBtn.classList.remove('active');
+    
+    // Stop polling for logs
+    stopLogsPolling();
+}
+
+// Load logs from server
+async function loadLogs() {
+    try {
+        const response = await fetch('/logs?limit=50', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.logs) {
+            displayLogs(data.logs);
+        } else {
+            displayLogsError(data.error || 'Failed to load logs');
+        }
+        
+    } catch (error) {
+        console.error('Error loading logs:', error);
+        displayLogsError('Failed to connect to log service');
+    }
+}
+
+// Display logs in the panel
+function displayLogs(logs) {
+    const logsList = document.getElementById('logs-list');
+    
+    if (!logs || logs.length === 0) {
+        logsList.textContent = ''; // Clear existing content
+        
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'logs-empty';
+        emptyDiv.textContent = 'No logs available';
+        
+        logsList.appendChild(emptyDiv);
+        return;
+    }
+    
+    // Clear existing logs
+    logsList.textContent = '';
+    
+    // Add each log entry
+    logs.forEach(log => {
+        const logElement = createLogElement(log);
+        logsList.appendChild(logElement);
+    });
+    
+    // Scroll to bottom to show latest logs
+    const logsContent = document.getElementById('logs-content');
+    logsContent.scrollTop = logsContent.scrollHeight;
+}
+
+// Create a log entry element
+function createLogElement(log) {
+    const logEntry = document.createElement('div');
+    logEntry.className = `log-entry level-${log.level}`;
+    
+    const timestamp = new Date(log.timestamp).toLocaleTimeString();
+    
+    // Create elements safely without innerHTML
+    const timestampSpan = document.createElement('span');
+    timestampSpan.className = 'log-timestamp';
+    timestampSpan.textContent = timestamp;
+    
+    const levelSpan = document.createElement('span');
+    levelSpan.className = `log-level ${log.level}`;
+    levelSpan.textContent = log.level;
+    
+    const messageSpan = document.createElement('span');
+    messageSpan.className = 'log-message';
+    messageSpan.textContent = log.message;
+    
+    logEntry.appendChild(timestampSpan);
+    logEntry.appendChild(levelSpan);
+    logEntry.appendChild(messageSpan);
+    
+    return logEntry;
+}
+
+// Display logs error
+function displayLogsError(errorMessage) {
+    const logsList = document.getElementById('logs-list');
+    logsList.textContent = ''; // Clear existing content
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'logs-empty';
+    errorDiv.textContent = `Error: ${errorMessage}`;
+    
+    logsList.appendChild(errorDiv);
+}
+
+// Clear logs display
+function clearLogsDisplay() {
+    const logsList = document.getElementById('logs-list');
+    logsList.textContent = ''; // Clear existing content
+    
+    const clearedDiv = document.createElement('div');
+    clearedDiv.className = 'logs-empty';
+    clearedDiv.textContent = 'Logs cleared';
+    
+    logsList.appendChild(clearedDiv);
+}
+
+// Start polling for new logs
+function startLogsPolling() {
+    // Poll every 2 seconds when logs are visible
+    logsPollingInterval = setInterval(loadLogs, 2000);
+}
+
+// Stop polling for logs
+function stopLogsPolling() {
+    if (logsPollingInterval) {
+        clearInterval(logsPollingInterval);
+        logsPollingInterval = null;
+    }
+}
+
+// Show logs automatically when a form submission starts
+const originalSetSubmittingState = setSubmittingState;
+setSubmittingState = function(submitting) {
+    originalSetSubmittingState(submitting);
+    
+    // Auto-show logs when starting a submission
+    if (submitting && !logsVisible) {
+        const toggleBtn = document.getElementById('toggle-logs');
+        if (toggleBtn) {
+            toggleBtn.click();
+        }
+    }
+};
+
+// Enhanced toast function to also log to console and potentially show in logs
+const originalShowToast = showToast;
+showToast = function(message, type = 'info', duration = 5000) {
+    originalShowToast(message, type, duration);
+    
+    // Also log to console for debugging
+    console.log(`[${type.toUpperCase()}] ${message}`);
+};
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    stopLogsPolling();
+});

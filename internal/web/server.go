@@ -21,14 +21,22 @@ type Server struct {
 	debug       bool
 	server      *http.Server
 	rateLimiter *RateLimiter
+	logHook     *WebUIHook
 }
 
 // NewServer creates a new Server instance with the provided configuration
 func NewServer(conf config.Config, debug bool) *Server {
+	// Create log hook for capturing logs for web UI
+	logHook := NewWebUIHook(100) // Buffer last 100 log entries
+
+	// Add the hook to logrus
+	log.AddHook(logHook)
+
 	return &Server{
 		config:      conf,
 		debug:       debug,
 		rateLimiter: NewRateLimiter(10, time.Minute), // 10 requests per minute
+		logHook:     logHook,
 	}
 }
 
@@ -40,6 +48,8 @@ func (s *Server) SetupRoutes() *http.ServeMux {
 	mux.HandleFunc("/", s.withMiddleware(s.handleIndex))
 	mux.HandleFunc("/submit", s.withMiddleware(s.handleSubmit))
 	mux.HandleFunc("/categories", s.withMiddleware(s.handleCategories))
+	mux.HandleFunc("/logs", s.withMiddleware(s.handleLogs))
+	mux.HandleFunc("/logs/stream", s.withMiddleware(s.handleLogsSSE))
 	mux.HandleFunc("/static/", s.withMiddleware(s.handleStatic))
 
 	// Direct routes for common assets (for backward compatibility and convenience)

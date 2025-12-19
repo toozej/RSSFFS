@@ -9,7 +9,11 @@
             "envFile": "${workspaceFolder}/.env",
             "program": "${workspaceFolder}/main.go",
             "cwd": "${workspaceFolder}",
-            "args": ["--category", "photography", "https://blog.jimgrey.net/2024/08/13/film-photography-blogs-you-should-follow-5/"]
+            "args": [
+                "--category",
+                "photography",
+                "https://blog.jimgrey.net/2024/08/13/film-photography-blogs-you-should-follow-5/"
+            ]
         },
         {
             "name": "RSSFFS serve",
@@ -19,7 +23,10 @@
             "envFile": "${workspaceFolder}/.env",
             "program": "${workspaceFolder}/main.go",
             "cwd": "${workspaceFolder}",
-            "args": ["serve", "--debug"]
+            "args": [
+                "serve",
+                "--debug"
+            ]
         },
         {
             "name": "Get RSSFFS version",
@@ -29,7 +36,9 @@
             "envFile": "${workspaceFolder}/.env",
             "program": "${workspaceFolder}/main.go",
             "cwd": "${workspaceFolder}",
-            "args": ["version"]
+            "args": [
+                "version"
+            ]
         }
     ]
 }
