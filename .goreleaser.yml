@@ -195,7 +195,7 @@ homebrew_casks:
       name: homebrew-tap
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     manpages:
-      - "man/RSSFFS.1.gz"
+      - "manpages/RSSFFS.1.gz"
     completions:
       bash: "completions/RSSFFS.bash"
       zsh: "completions/RSSFFS.zsh"
