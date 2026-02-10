@@ -28,4 +28,5 @@ COPY --from=build /go/RSSFFS/RSSFFS /go/bin/RSSFFS
 # Expose port for publishing as web service
 EXPOSE 8080
 # Run the binary.
+USER nonroot
 ENTRYPOINT ["/go/bin/RSSFFS"]
