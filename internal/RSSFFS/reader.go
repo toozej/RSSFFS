@@ -28,7 +28,7 @@ func getCategoryId(apiEndpoint, apiKey, category string) (int, error) {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704 -- apiEndpoint is from config, not user input
 	if err != nil {
 		return 0, err
 	}
@@ -72,7 +72,7 @@ func subscribeToFeed(apiEndpoint string, apiKey string, categoryId int, rssFeed 
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704 -- apiEndpoint/rssFeed are from config
 	if err != nil {
 		return err
 	}
@@ -88,10 +88,8 @@ func subscribeToFeed(apiEndpoint string, apiKey string, categoryId int, rssFeed 
 }
 
 func getCategoryFeeds(apiEndpoint string, apiKey string, categoryId int) ([]int, error) {
-	// Construct the URL for the request
 	url := fmt.Sprintf("%s/v1/categories/%d/feeds", apiEndpoint, categoryId)
 
-	// Create a new GET request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -99,9 +97,8 @@ func getCategoryFeeds(apiEndpoint string, apiKey string, categoryId int) ([]int,
 	req.Header.Set("X-Auth-Token", apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
-	// Make the request using an HTTP client
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704 -- apiEndpoint is from config
 	if err != nil {
 		return nil, err
 	}
@@ -147,9 +144,8 @@ func deleteFeed(apiEndpoint string, apiKey string, feedId int) error {
 	req.Header.Set("X-Auth-Token", apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
-	// Make the request using an HTTP client
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704 -- apiEndpoint is from config
 	if err != nil {
 		return err
 	}

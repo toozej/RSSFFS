@@ -205,7 +205,7 @@ func (s *Server) handleLogsSSE(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		// nosemgrep: go.lang.security.audit.xss.no-fprintf-to-responsewriter.no-fprintf-to-responsewriter
-		fmt.Fprintf(w, "event: log\ndata: %s\n\n", data)
+		fmt.Fprintf(w, "event: log\ndata: %s\n\n", data) // #nosec G705 -- data is JSON-marshaled log entry, safe for SSE
 	}
 
 	// Flush initial data

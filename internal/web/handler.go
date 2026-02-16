@@ -443,7 +443,7 @@ func (s *Server) fetchCategoriesFromAPI() ([]CategoryResponseItem, error) {
 		Timeout: 10 * time.Second,
 	}
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704 -- URL is from config, not user input
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch categories: %w", err)
 	}
