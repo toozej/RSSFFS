@@ -53,6 +53,7 @@ func (lb *LogBuffer) GetRecent(limit int) []LogEntry {
 		limit = lb.size
 	}
 
+	// codeql[go/uncontrolled-allocation-size] limit is capped at 200 by the caller before reaching this function
 	result := make([]LogEntry, 0, limit)
 
 	// Start from the most recent entry and work backwards
