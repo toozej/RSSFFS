@@ -164,6 +164,8 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// HttpOnly=false required for JS CSRF token read; Secure set based on TLS availability
+	// #nosec G124 -- cookie security attributes set intentionally for CSRF token JS access
 	// nosemgrep: go.lang.security.audit.net.cookie-missing-httponly.cookie-missing-httponly, go.lang.security.audit.net.cookie-missing-secure.cookie-missing-secure
 	http.SetCookie(w, &http.Cookie{
 		Name:     "csrf_token",

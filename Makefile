@@ -132,11 +132,11 @@ local-iterate: ## Run `make local-build local-run` via `air` any time a .go or .
 
 local-release-test: ## Build assets and test goreleaser config using locally installed golang toolchain and goreleaser
 	goreleaser check
-	goreleaser build --rm-dist --snapshot
+	goreleaser build --clean --snapshot
 
 local-release: local-test docker-login ## Release assets using locally installed golang toolchain and goreleaser
 	if test -e $(CURDIR)/RSSFFS.key && test -e $(CURDIR)/.env; then \
-		export `cat $(CURDIR)/.env | xargs` && goreleaser release --rm-dist; \
+		export `cat $(CURDIR)/.env | xargs` && goreleaser release --clean; \
 	else \
 		echo "no cosign private key found at $(CURDIR)/RSSFFS.key. Cannot release."; \
 	fi
@@ -199,6 +199,8 @@ pre-commit-install: ## Install pre-commit hooks and necessary binaries
 	command -v actionlint || brew install actionlint || go install github.com/rhysd/actionlint/cmd/actionlint@latest
 	# syft
 	command -v syft || curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+	# semgrep
+	command -v semgrep || brew install semgrep || python3 -m pip install --break-system-packages --upgrade semgrep
 	# cosign
 	go install github.com/sigstore/cosign/cmd/cosign@latest
 	# go-licenses
