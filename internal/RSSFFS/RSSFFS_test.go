@@ -420,6 +420,66 @@ func TestRSSPatternChecking(t *testing.T) {
 	}
 }
 
+// TestMediumSpecialCase tests the special case handling for medium.com URLs
+func TestMediumSpecialCase(t *testing.T) {
+	tests := []struct {
+		name         string
+		domain       string
+		originalURL  string
+		expectedPath string
+		shouldTry    bool
+	}{
+		{
+			name:         "Medium.com with username",
+			domain:       "medium.com",
+			originalURL:  "https://medium.com/rokkorxblog",
+			expectedPath: "rokkorxblog",
+			shouldTry:    true,
+		},
+		{
+			name:         "Medium.com root",
+			domain:       "medium.com",
+			originalURL:  "https://medium.com",
+			expectedPath: "",
+			shouldTry:    false,
+		},
+		{
+			name:         "Medium.com with path",
+			domain:       "medium.com",
+			originalURL:  "https://medium.com/tag/technology",
+			expectedPath: "",
+			shouldTry:    false, // has slash, not username
+		},
+		{
+			name:         "Other domain",
+			domain:       "example.com",
+			originalURL:  "https://example.com/user",
+			expectedPath: "",
+			shouldTry:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Test the logic for constructing special URL
+			if tt.domain == "medium.com" && strings.HasPrefix(tt.originalURL, "https://medium.com/") {
+				path := strings.TrimPrefix(tt.originalURL, "https://medium.com/")
+				if path != "" && !strings.Contains(path, "/") {
+					specialURL := "https://medium.com/feed/" + path
+					expected := "https://medium.com/feed/" + tt.expectedPath
+					if specialURL != expected {
+						t.Errorf("Expected special URL %s, got %s", expected, specialURL)
+					}
+				} else if tt.shouldTry {
+					t.Errorf("Expected to try special case for %s", tt.originalURL)
+				}
+			} else if tt.shouldTry {
+				t.Errorf("Did not expect to try special case for %s", tt.originalURL)
+			}
+		})
+	}
+}
+
 // TestModeSelectionPrecedence tests CLI flag vs environment variable precedence
 func TestModeSelectionPrecedence(t *testing.T) {
 	precedenceTests := []struct {

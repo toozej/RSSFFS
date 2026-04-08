@@ -194,7 +194,7 @@ func getAllDomainsFromPage(pageURL string) (map[string]bool, error) {
 }
 
 // checkDomainsForRSS checks for RSS feeds on the given domains with concurrency
-func checkDomainsForRSS(domains map[string]bool) []string {
+func checkDomainsForRSS(domains map[string]bool, pageURL string) []string {
 	var wg sync.WaitGroup
 	feedChan := make(chan string)
 	feedMap := make(map[string]bool)
@@ -204,7 +204,7 @@ func checkDomainsForRSS(domains map[string]bool) []string {
 		wg.Add(1)
 		go func(domain string) {
 			defer wg.Done()
-			feed := findPreferredRSSFeed(domain)
+			feed := findPreferredRSSFeed(domain, pageURL)
 			if feed != "" {
 				mu.Lock()
 				if !feedMap[domain] {
@@ -231,7 +231,7 @@ func checkDomainsForRSS(domains map[string]bool) []string {
 }
 
 // findPreferredRSSFeed checks RSS patterns for a domain and returns the first valid one based on preference
-func findPreferredRSSFeed(domain string) string {
+func findPreferredRSSFeed(domain string, originalURL string) string {
 	client := &http.Client{
 		Timeout: time.Second * timeoutSeconds,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -251,6 +251,21 @@ func findPreferredRSSFeed(domain string) string {
 			return feedURL
 		}
 	}
+
+	// Special case for medium.com: if original URL is https://medium.com/$USERNAME, try https://medium.com/feed/$USERNAME
+	if domain == "medium.com" && strings.HasPrefix(originalURL, "https://medium.com/") {
+		path := strings.TrimPrefix(originalURL, "https://medium.com/")
+		if path != "" && !strings.Contains(path, "/") {
+			// Assuming it's a username, no further slashes
+			specialURL := "https://medium.com/feed/" + path
+			log.Debugf("Checking special Medium RSS feed URL: %s", specialURL)
+			if checkRSSFeed(client, specialURL) {
+				log.Debugf("Valid RSS feed found at special Medium URL: %s", specialURL)
+				return specialURL
+			}
+		}
+	}
+
 	log.Debugf("No RSS feeds found for domain: %s", domain)
 	return ""
 }
@@ -323,7 +338,7 @@ func runSingleURLMode(pageURL string, categoryId int, debug bool) (int, error) {
 	log.Debugf("Single URL mode: checking common RSS patterns on %s", domain)
 
 	// Use existing RSS detection logic for the target domain
-	feed := findPreferredRSSFeed(domain)
+	feed := findPreferredRSSFeed(domain, pageURL)
 	if feed != "" {
 		log.Infof("Single URL mode: Found RSS feed on %s: %s", domain, feed)
 		if debug {
@@ -365,7 +380,7 @@ func runTraversalMode(pageURL string, categoryId int, debug bool) (int, error) {
 	}
 
 	// Deduplicate valid RSS feeds
-	validFeeds := checkDomainsForRSS(domains)
+	validFeeds := checkDomainsForRSS(domains, pageURL)
 
 	if len(validFeeds) == 0 {
 		log.Infof("Traversal mode: No RSS feeds found across %d domains", len(domains))
