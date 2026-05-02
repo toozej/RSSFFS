@@ -1,5 +1,5 @@
 # setup project and deps
-FROM golang:1.26-bookworm AS init
+FROM golang:1.26-trixie AS init
 
 WORKDIR /go/RSSFFS/
 
@@ -22,7 +22,7 @@ ARG LDFLAGS
 RUN CGO_ENABLED=0 go build -ldflags="${LDFLAGS}"
 
 # runtime image including CA certs and tzdata
-FROM gcr.io/distroless/static-debian12:latest
+FROM gcr.io/distroless/static-debian13:nonroot
 # Copy our static executable.
 COPY --from=build /go/RSSFFS/RSSFFS /go/bin/RSSFFS
 # Expose port for publishing as web service
