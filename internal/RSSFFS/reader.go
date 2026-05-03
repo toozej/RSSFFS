@@ -32,7 +32,11 @@ func getCategoryId(apiEndpoint, apiKey, category string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("Error closing response body: %v", err)
+		}
+	}()
 
 	// Check for a successful response
 	if resp.StatusCode != http.StatusOK {
@@ -76,7 +80,11 @@ func subscribeToFeed(apiEndpoint string, apiKey string, categoryId int, rssFeed 
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("Error closing response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode >= 400 {
 		log.Debugf("Got response %s with response code %d\n", resp.Status, resp.StatusCode)
@@ -102,9 +110,11 @@ func getCategoryFeeds(apiEndpoint string, apiKey string, categoryId int) ([]int,
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-
-	// Check for a valid response status
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("Error closing response body: %v", err)
+		}
+	}()
 	if resp.StatusCode != http.StatusOK {
 		log.Debugf("Received unexpected status code %d when fetching feeds for category %d", resp.StatusCode, categoryId)
 		return nil, fmt.Errorf("failed to fetch feeds, status code: %d", resp.StatusCode)
@@ -149,9 +159,11 @@ func deleteFeed(apiEndpoint string, apiKey string, feedId int) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
-
-	// Check the response status
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("Error closing response body: %v", err)
+		}
+	}()
 	if resp.StatusCode == http.StatusNoContent {
 		// HTTP 204 No Content means successful deletion
 		log.Infof("Successfully deleted feed with ID %d", feedId)

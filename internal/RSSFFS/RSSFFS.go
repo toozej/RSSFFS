@@ -165,7 +165,11 @@ func getAllDomainsFromPage(pageURL string) (map[string]bool, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("Error closing response body: %v", err)
+		}
+	}()
 
 	tokenizer := html.NewTokenizer(resp.Body)
 	domains := make(map[string]bool)
@@ -173,10 +177,10 @@ func getAllDomainsFromPage(pageURL string) (map[string]bool, error) {
 	// Parse HTML and extract URLs
 	for {
 		tt := tokenizer.Next()
-		switch {
-		case tt == html.ErrorToken:
+		switch tt {
+		case html.ErrorToken:
 			return domains, nil
-		case tt == html.StartTagToken:
+		case html.StartTagToken:
 			t := tokenizer.Token()
 			if t.Data == "a" {
 				for _, attr := range t.Attr {
@@ -282,7 +286,11 @@ func checkRSSFeed(client *http.Client, feedURL string) bool {
 	if err != nil || resp.StatusCode != 200 {
 		return false
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Errorf("Error closing response body: %v", err)
+		}
+	}()
 
 	// Check if the Content-Type header indicates an RSS feed
 	contentType := resp.Header.Get("Content-Type")

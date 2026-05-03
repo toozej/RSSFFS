@@ -447,7 +447,7 @@ func (s *Server) fetchCategoriesFromAPI() ([]CategoryResponseItem, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch categories: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API returned status code: %d", resp.StatusCode)

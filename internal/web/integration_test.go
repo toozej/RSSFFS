@@ -289,7 +289,7 @@ func TestCategoriesEndpoint(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to get categories: %v", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("Expected status 200, got %d", resp.StatusCode)

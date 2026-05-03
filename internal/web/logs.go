@@ -194,7 +194,7 @@ func (s *Server) handleLogsSSE(w http.ResponseWriter, r *http.Request) {
 
 	// Check if we have a log hook installed
 	if s.logHook == nil {
-		fmt.Fprintf(w, "event: error\ndata: Log capture not available\n\n")
+		_, _ = fmt.Fprintf(w, "event: error\ndata: Log capture not available\n\n")
 		return
 	}
 
@@ -206,7 +206,7 @@ func (s *Server) handleLogsSSE(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		// nosemgrep: go.lang.security.audit.xss.no-fprintf-to-responsewriter.no-fprintf-to-responsewriter
-		fmt.Fprintf(w, "event: log\ndata: %s\n\n", data) // #nosec G705 -- data is JSON-marshaled log entry, safe for SSE
+		_, _ = fmt.Fprintf(w, "event: log\ndata: %s\n\n", data) // #nosec G705 -- data is JSON-marshaled log entry, safe for SSE
 	}
 
 	// Flush initial data
@@ -225,7 +225,7 @@ func (s *Server) handleLogsSSE(w http.ResponseWriter, r *http.Request) {
 		case <-ticker.C:
 			// Send heartbeat
 			// nosemgrep: go.lang.security.audit.xss.no-fprintf-to-responsewriter.no-fprintf-to-responsewriter
-			fmt.Fprintf(w, "event: heartbeat\ndata: {\"timestamp\":\"%s\"}\n\n", time.Now().Format(time.RFC3339))
+			_, _ = fmt.Fprintf(w, "event: heartbeat\ndata: {\"timestamp\":\"%s\"}\n\n", time.Now().Format(time.RFC3339))
 			if flusher, ok := w.(http.Flusher); ok {
 				flusher.Flush()
 			}

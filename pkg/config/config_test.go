@@ -127,29 +127,29 @@ func TestGetEnvVars(t *testing.T) {
 			originalSingleURLMode := os.Getenv("RSSFFS_SINGLE_URL_MODE")
 			defer func() {
 				if originalEndpoint != "" {
-					os.Setenv("RSS_READER_ENDPOINT", originalEndpoint)
+					_ = os.Setenv("RSS_READER_ENDPOINT", originalEndpoint)
 				} else {
-					os.Unsetenv("RSS_READER_ENDPOINT")
+					_ = os.Unsetenv("RSS_READER_ENDPOINT")
 				}
 				if originalAPIKey != "" {
-					os.Setenv("RSS_READER_API_KEY", originalAPIKey)
+					_ = os.Setenv("RSS_READER_API_KEY", originalAPIKey)
 				} else {
-					os.Unsetenv("RSS_READER_API_KEY")
+					_ = os.Unsetenv("RSS_READER_API_KEY")
 				}
 				if originalWebHost != "" {
-					os.Setenv("WEB_HOST", originalWebHost)
+					_ = os.Setenv("WEB_HOST", originalWebHost)
 				} else {
-					os.Unsetenv("WEB_HOST")
+					_ = os.Unsetenv("WEB_HOST")
 				}
 				if originalWebPort != "" {
-					os.Setenv("WEB_PORT", originalWebPort)
+					_ = os.Setenv("WEB_PORT", originalWebPort)
 				} else {
-					os.Unsetenv("WEB_PORT")
+					_ = os.Unsetenv("WEB_PORT")
 				}
 				if originalSingleURLMode != "" {
-					os.Setenv("RSSFFS_SINGLE_URL_MODE", originalSingleURLMode)
+					_ = os.Setenv("RSSFFS_SINGLE_URL_MODE", originalSingleURLMode)
 				} else {
-					os.Unsetenv("RSSFFS_SINGLE_URL_MODE")
+					_ = os.Unsetenv("RSSFFS_SINGLE_URL_MODE")
 				}
 			}()
 
@@ -164,11 +164,11 @@ func TestGetEnvVars(t *testing.T) {
 			}()
 
 			// Clear environment variables first
-			os.Unsetenv("RSS_READER_ENDPOINT")
-			os.Unsetenv("RSS_READER_API_KEY")
-			os.Unsetenv("WEB_HOST")
-			os.Unsetenv("WEB_PORT")
-			os.Unsetenv("RSSFFS_SINGLE_URL_MODE")
+			_ = os.Unsetenv("RSS_READER_ENDPOINT")
+			_ = os.Unsetenv("RSS_READER_API_KEY")
+			_ = os.Unsetenv("WEB_HOST")
+			_ = os.Unsetenv("WEB_PORT")
+			_ = os.Unsetenv("RSSFFS_SINGLE_URL_MODE")
 
 			// Create .env file if applicable
 			if tt.mockEnvFile != "" {
@@ -180,7 +180,7 @@ func TestGetEnvVars(t *testing.T) {
 
 			// Set mock environment variables (these should override .env file)
 			for key, value := range tt.mockEnv {
-				os.Setenv(key, value)
+				_ = os.Setenv(key, value)
 			}
 
 			// Call function - only test cases that shouldn't exit

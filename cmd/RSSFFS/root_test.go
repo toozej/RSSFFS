@@ -82,8 +82,14 @@ func TestRootCommandFlags(t *testing.T) {
 
 			// Set environment variables if provided
 			for key, value := range tt.envVars {
-				os.Setenv(key, value)
-				defer os.Unsetenv(key)
+				if err := os.Setenv(key, value); err != nil {
+					t.Fatalf("Failed to set env var %s: %v", key, err)
+				}
+				defer func(k string) {
+					if err := os.Unsetenv(k); err != nil {
+						t.Fatalf("Failed to unset env var %s: %v", k, err)
+					}
+				}(key)
 			}
 
 			// Create a new command for testing to avoid state pollution
@@ -167,8 +173,14 @@ func TestFlagPrecedence(t *testing.T) {
 
 			// Set environment variables
 			for key, value := range tt.envVars {
-				os.Setenv(key, value)
-				defer os.Unsetenv(key)
+				if err := os.Setenv(key, value); err != nil {
+					t.Fatalf("Failed to set env var %s: %v", key, err)
+				}
+				defer func(k string) {
+					if err := os.Unsetenv(k); err != nil {
+						t.Fatalf("Failed to unset env var %s: %v", k, err)
+					}
+				}(key)
 			}
 
 			// Create test command
@@ -359,8 +371,14 @@ func TestCLIIntegrationWorkflow(t *testing.T) {
 
 			// Set environment variables
 			for key, value := range tt.envVars {
-				os.Setenv(key, value)
-				defer os.Unsetenv(key)
+				if err := os.Setenv(key, value); err != nil {
+					t.Fatalf("Failed to set env var %s: %v", key, err)
+				}
+				defer func(k string) {
+					if err := os.Unsetenv(k); err != nil {
+						t.Fatalf("Failed to unset env var %s: %v", k, err)
+					}
+				}(key)
 			}
 
 			// Create a test command that mimics the root command behavior
@@ -458,8 +476,14 @@ func TestEnvironmentVariablePrecedence(t *testing.T) {
 
 			// Set environment variable if provided
 			if tt.envVar != "" && tt.envValue != "" {
-				os.Setenv(tt.envVar, tt.envValue)
-				defer os.Unsetenv(tt.envVar)
+				if err := os.Setenv(tt.envVar, tt.envValue); err != nil {
+					t.Fatalf("Failed to set env var %s: %v", tt.envVar, err)
+				}
+				defer func(k string) {
+					if err := os.Unsetenv(k); err != nil {
+						t.Fatalf("Failed to unset env var %s: %v", k, err)
+					}
+				}(tt.envVar)
 			}
 
 			// Create test command
