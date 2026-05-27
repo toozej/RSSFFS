@@ -40,7 +40,13 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - -s -w -X github.com/toozej/RSSFFS/pkg/version.Version={{.Version}} -X github.com/toozej/RSSFFS/pkg/version.Commit={{.Commit}} -X github.com/toozej/RSSFFS/pkg/version.Branch={{.Branch}} -X github.com/toozej/RSSFFS/pkg/version.BuiltAt={{.CommitDate}} -X github.com/toozej/RSSFFS/pkg/version.Builder=goreleaser
+      - >-
+        -s -w
+        -X github.com/toozej/RSSFFS/pkg/version.Version={{.Version}}
+        -X github.com/toozej/RSSFFS/pkg/version.Commit={{.Commit}}
+        -X github.com/toozej/RSSFFS/pkg/version.Branch={{.Branch}}
+        -X github.com/toozej/RSSFFS/pkg/version.BuiltAt={{.CommitDate}}
+        -X github.com/toozej/RSSFFS/pkg/version.Builder=goreleaser
     main: ./
     binary: RSSFFS
 
@@ -79,7 +85,7 @@ changelog:
       order: 9999
 
 dockers_v2:
-  - id: rssffs
+  - id: RSSFFS
     images:
       - 'toozej/rssffs'
       - 'ghcr.io/toozej/rssffs'
@@ -119,7 +125,7 @@ dockers_v2:
       "index,manifest:org.opencontainers.image.version": "{{.Version}}"
     extra_files:
       - scripts/goreleaser_entrypoint.sh
-  - id: rssffs-distroless
+  - id: RSSFFS-distroless
     images:
       - 'toozej/rssffs'
       - 'ghcr.io/toozej/rssffs'
@@ -159,8 +165,6 @@ dockers_v2:
       "index,manifest:org.opencontainers.image.version": "{{.Version}}"
     extra_files:
       - scripts/goreleaser_entrypoint.sh
-
-
 
 archives:
   - name_template: >-
@@ -224,7 +228,7 @@ nfpms:
         - changelog-file-missing-in-native-package
 
 homebrew_casks:
-  - name: rssffs
+  - name: RSSFFS
     homepage: https://github.com/toozej/RSSFFS
     description: "RSS Feed Finder [and] Subscriber"
     license: GPLv3

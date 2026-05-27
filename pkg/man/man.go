@@ -1,8 +1,8 @@
 // Package man provides manual page generation functionality for the RSSFFS application.
 //
-// This package creates Unix manual pages (man pages) for the RSSFFS (RSS Feed Finder
-// and Subscriber) CLI application using the mango-cobra library. It generates properly
-// formatted man pages that can be viewed with the standard `man` command on Unix systems.
+// This package creates Unix manual pages (man pages) for the RSSFFS CLI
+// application using the mango-cobra library. It generates properly formatted
+// man pages that can be viewed with the standard `man` command on Unix systems.
 //
 // The package integrates with cobra commands to automatically generate documentation
 // from command structures, descriptions, and usage information. Generated man pages
