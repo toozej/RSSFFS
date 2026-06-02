@@ -83,8 +83,11 @@ release: ## Build and sign Docker image
 get-cosign-pub-key: ## Get RSSFFS Cosign public key from GitHub
 	test -f $(CURDIR)/RSSFFS.pub || curl --silent https://raw.githubusercontent.com/toozej/RSSFFS/main/RSSFFS.pub -O
 
-verify: get-cosign-pub-key ## Verify Docker image with Cosign
-	cosign verify --key $(CURDIR)/RSSFFS.pub $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG)
+verify: ## Verify Docker image with Cosign
+	cosign verify \
+		--certificate-identity-regexp '^https://github.com/toozej/RSSFFS/.github/workflows/release.yaml@refs/tags/.*$$' \
+		--certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+		$(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 distroless-build: ## Build Docker image using distroless as final base
 	docker build -f $(CURDIR)/Dockerfile.distroless \
