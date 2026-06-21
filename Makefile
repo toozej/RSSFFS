@@ -45,9 +45,9 @@ else
 	OPENER=open
 endif
 
-.PHONY: all vet test build release verify run up down distroless-build distroless-run up-prod down-prod install local local-vet local-test local-cover local-run local-kill local-iterate local-release-test local-release local-sign local-verify local-release-verify local-install get-cosign-pub-key docker-login pre-commit-install pre-commit-run pre-commit pre-reqs update-golang-version upload-secrets-to-gh upload-secrets-envfile-to-1pass docs diagrams mutation-test test-changed watch-test profile-cpu profile-mem profile-all benchmark clean help
+.PHONY: all vet test build release verify run up down distroless-build distroless-run up-prod down-prod install local local-vet local-test local-cover local-run local-kill local-iterate local-release-test local-release local-sign local-verify local-release-verify local-install docker-login pre-commit-install pre-commit-run pre-commit pre-reqs update-golang-version upload-secrets-to-gh upload-secrets-envfile-to-1pass docs diagrams mutation-test test-changed watch-test profile-cpu profile-mem profile-all benchmark clean help
 
-all: vet pre-commit clean test build verify ## Run default workflow via Docker
+all: vet pre-commit clean test build verify run ## Run default workflow via Docker
 local: local-update-deps local-vendor local-vet pre-commit clean local-test local-cover local-build local-release-test ## Run default workflow using locally installed Golang toolchain
 local-release-verify: local-release local-sign local-verify ## Release and verify using locally installed Golang toolchain
 pre-reqs: pre-commit-install ## Install pre-commit hooks and necessary binaries
@@ -80,12 +80,9 @@ release: ## Build and sign Docker image
 		echo "No environment variables found at $(CURDIR)/.env. Cannot release."; \
 	fi
 
-get-cosign-pub-key: ## Get RSSFFS Cosign public key from GitHub
-	test -f $(CURDIR)/RSSFFS.pub || curl --silent https://raw.githubusercontent.com/toozej/RSSFFS/main/RSSFFS.pub -O
-
 verify: ## Verify Docker image with Cosign
 	cosign verify \
-		--certificate-identity-regexp '^https://github.com/toozej/RSSFFS/.github/workflows/release.yaml@refs/tags/.*$$' \
+		--certificate-identity-regexp '^https://github.com/toozej/RSSFFS/.github/workflows/(release|weekly-docker-refresh)\.yaml@refs/(tags/.*|heads/main)$$' \
 		--certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
 		$(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG)
 
@@ -176,24 +173,29 @@ local-release-test: ## Build assets and test goreleaser config using locally ins
 	goreleaser build --clean --snapshot
 
 local-release: local-test docker-login ## Release assets using locally installed golang toolchain and goreleaser
-	if test -e $(CURDIR)/RSSFFS.key && test -e $(CURDIR)/.env; then \
+	if test -e $(CURDIR)/.env; then \
 		export `cat $(CURDIR)/.env | xargs` && goreleaser release --clean; \
 	else \
-		echo "no cosign private key found at $(CURDIR)/RSSFFS.key. Cannot release."; \
+		echo "No environment variables found at $(CURDIR)/.env. Cannot release."; \
 	fi
 
 local-sign: local-test ## Sign locally installed golang toolchain and cosign
-	if test -e $(CURDIR)/RSSFFS.key && test -e $(CURDIR)/.env; then \
-		export `cat $(CURDIR)/.env | xargs` && cosign sign-blob --key=$(CURDIR)/RSSFFS.key --bundle=$(CURDIR)/RSSFFS.bundle $(CURDIR)/out/RSSFFS; \
+	cosign sign-blob --bundle=$(CURDIR)/out/RSSFFS.bundle $(CURDIR)/out/RSSFFS --yes
+
+local-verify: ## Verify locally compiled binary
+	# cosign here assumes you're using Linux AMD64 binary
+	@echo "Verifying locally compiled binary..."
+	@if test -f $(CURDIR)/out/RSSFFS.bundle; then \
+		cosign verify-blob \
+			--certificate-identity-regexp '^https://github.com/toozej/RSSFFS/.github/workflows/(release|weekly-docker-refresh)\.yaml@refs/(tags/.*|heads/main)$$' \
+			--certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+			--bundle $(CURDIR)/out/RSSFFS.bundle \
+			$(CURDIR)/out/RSSFFS; \
 	else \
-		echo "no cosign private key found at $(CURDIR)/RSSFFS.key. Cannot release."; \
+		echo "No bundle found at $(CURDIR)/out/RSSFFS.bundle. Skipping verification."; \
 	fi
 
-local-verify: get-cosign-pub-key ## Verify locally compiled binary
-	# cosign here assumes you're using Linux AMD64 binary
-	cosign verify-blob --key $(CURDIR)/RSSFFS.pub --bundle $(CURDIR)/RSSFFS.bundle $(CURDIR)/out/RSSFFS
-
-local-install: local-build local-verify ## Install compiled binary to local machine
+local-install: local-build ## Install compiled binary to local machine
 	sudo cp $(CURDIR)/out/RSSFFS /usr/local/bin/RSSFFS
 	sudo chmod 0755 /usr/local/bin/RSSFFS
 
@@ -337,7 +339,7 @@ clean: ## Remove any locally compiled binaries, profiles, demo output, and built
 	@rm -rf $(CURDIR)/profiles/
 	@rm -rf $(CURDIR)/dist/
 	@rm -rf $(CURDIR)/c.out
-	@rm -rf $(CURDIR)/*.bundle
+	@rm -f $(CURDIR)/out/*.bundle
 	@rm -rf $(CURDIR)/manpages/
 	@rm -rf $(CURDIR)/completions/
 	@rm -rf $(DEMO_DIR)
