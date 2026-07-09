@@ -1,5 +1,10 @@
 # RSSFFS
 
+**This repository has moved to [monogo](https://github.com/toozej/monogo).**
+
+
+
+
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/toozej/RSSFFS)
 [![Go Report Card](https://goreportcard.com/badge/github.com/toozej/RSSFFS)](https://goreportcard.com/report/github.com/toozej/RSSFFS)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/toozej/RSSFFS/cicd.yaml)
